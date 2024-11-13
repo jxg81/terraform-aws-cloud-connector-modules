@@ -27,21 +27,23 @@ locals {
 # to the ec2 modules for admin_ssh_key public_key authentication.
 # This is not recommended for production deployments. Please consider modifying 
 # to pass your own custom public key file located in a secure location.   
+# MOVED AWS KEY-PAIR DEFENITION TO EXPLICIT VAR DEFENITON OF EXISTING KEY
+# FOLLOWING SECTIONS COMMENTED OUT AND KEY DEF CHANGED AT RESOURCE CREATION  
 ################################################################################
-resource "tls_private_key" "key" {
-  algorithm = var.tls_key_algorithm
-}
+#resource "tls_private_key" "key" {
+#  algorithm = var.tls_key_algorithm
+#}
 
-resource "aws_key_pair" "deployer" {
-  key_name   = "${var.name_prefix}-key-${random_string.suffix.result}"
-  public_key = tls_private_key.key.public_key_openssh
-}
+#resource "aws_key_pair" "deployer" {
+#  key_name   = "${var.name_prefix}-key-${random_string.suffix.result}"
+#  public_key = tls_private_key.key.public_key_openssh
+#}
 
-resource "local_file" "private_key" {
-  content         = tls_private_key.key.private_key_pem
-  filename        = "../${var.name_prefix}-key-${random_string.suffix.result}.pem"
-  file_permission = "0600"
-}
+#resource "local_file" "private_key" {
+#  content         = tls_private_key.key.private_key_pem
+#  filename        = "../${var.name_prefix}-key-${random_string.suffix.result}.pem"
+#  file_permission = "0600"
+#}
 
 
 ################################################################################
@@ -76,7 +78,8 @@ module "bastion" {
   global_tags               = local.global_tags
   vpc_id                    = module.network.vpc_id
   public_subnet             = module.network.public_subnet_ids[0]
-  instance_key              = aws_key_pair.deployer.key_name
+  instance_key              = var.ssh_key_pair
+  #instance_key             = aws_key_pair.deployer.key_name
   bastion_nsg_source_prefix = var.bastion_nsg_source_prefix
 }
 
@@ -92,7 +95,8 @@ module "workload" {
   global_tags    = local.global_tags
   vpc_id         = module.network.vpc_id
   subnet_id      = module.network.workload_subnet_ids
-  instance_key   = aws_key_pair.deployer.key_name
+  instance_key              = var.ssh_key_pair
+  #instance_key             = aws_key_pair.deployer.key_name
 }
 
 
@@ -142,7 +146,8 @@ module "cc_vm" {
   global_tags                        = local.global_tags
   mgmt_subnet_id                     = module.network.cc_subnet_ids
   service_subnet_id                  = module.network.cc_subnet_ids
-  instance_key                       = aws_key_pair.deployer.key_name
+  instance_key                       = var.ssh_key_pair
+  #instance_key                      = aws_key_pair.deployer.key_name
   user_data                          = local.userdata
   ccvm_instance_type                 = var.ccvm_instance_type
   cc_instance_size                   = var.cc_instance_size

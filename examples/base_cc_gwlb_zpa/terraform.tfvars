@@ -12,17 +12,22 @@
 
 ## 1. Zscaler Cloud Connector Provisioning URL E.g. connector.zscaler.net/api/v1/provUrl?name=aws_prov_url
 
-#cc_vm_prov_url                             = "connector.zscaler.net/api/v1/provUrl?name=aws_prov_url"
+cc_vm_prov_url                             = "connector.zscalerthree.net/api/v1/provUrl?name=AWS-SYD"
 
 ## 2. AWS Secrets Manager Secret Name from Secrets Manager E.g ZS/CC/credentials
 
-#secret_name                                =  "ZS/CC/credentials/aws_cc_secret_name"
+secret_name                                =  "zs/cloudconn"
 
 ## 3. Cloud Connector cloud init provisioning listener port. This is required for GWLB and Health Probe deployments. 
 ## Uncomment and set custom probe port to a single value of 80 or any number between 1024-65535. Default is 50000.
 
-#http_probe_port                            = 50000
+http_probe_port                            = 50000
 
+#####################################################################################################################
+##### SSH Key Pair variables #####
+#####################################################################################################################
+
+ssh_key_pair = "cc-syd-kp"
 
 #####################################################################################################################
 ##### Custom variables. Only change if required for your environment  #####
@@ -30,17 +35,17 @@
 
 ## 4. The name string for all Cloud Connector resources created by Terraform for Tag/Name attributes. (Default: zscc)
 
-#name_prefix                                = "zscc"
+name_prefix                                = "zscc"
 
 ## 5. AWS region where Cloud Connector resources will be deployed. This environment variable is automatically populated if running ZSEC script
 ##    and thus will override any value set here. Only uncomment and set this value if you are deploying terraform standalone. (Default: us-west-2)
 
-#aws_region                                 = "us-west-2"
+aws_region                                 = "ap-southeast-2"
 
 ## 6. Cloud Connector AWS EC2 Instance size selection. Uncomment ccvm_instance_type line with desired vm size to change.
 ##    (Default: m6i.large)
 
-#ccvm_instance_type                         = "t3.medium"
+ccvm_instance_type                         = "t3.medium"
 #ccvm_instance_type                         = "m5n.large"
 #ccvm_instance_type                         = "c5a.large"
 #ccvm_instance_type                         = "m6i.large"
@@ -59,21 +64,21 @@
 ##    If size = "large" only 4xlarge EC2 instane types can be deployed 
 ##    **** NOTE - medium and large cc_instance_size is only supported with GWLB deployments. Legacy HA/Lambda deployments must be small.
 
-#cc_instance_size                           = "small"
+cc_instance_size                           = "small"
 #cc_instance_size                           = "medium"
 #cc_instance_size                           = "large" 
 
 ## 8. The number of Cloud Connector Subnets to create in sequential availability zones. Available input range 1-3 (Default: 2)
 ##    **** NOTE - This value will be ignored if byo_vpc / byo_subnets
 
-#az_count                                   = 2
+az_count                                   = 2
 
 ## 9. The number of Cloud Connector appliances to provision. Each incremental Cloud Connector will be created in alternating 
 ##    subnets based on the az_count or byo_subnet_ids variable and loop through for any deployments where cc_count > az_count.
 ##    (Default: varies per deployment type template)
 ##    E.g. cc_count set to 4 and az_count set to 2 or byo_subnet_ids configured for 2 will create 2x CCs in AZ subnet 1 and 2x CCs in AZ subnet 2
 
-#cc_count                                   = 2
+cc_count                                   = 2
 
 ## 10. Network Configuration:
 ##    IPv4 CIDR configured with VPC creation. All Subnet resources (Workload, Public, Cloud Connector, Route 53) will be created based off this prefix
@@ -82,7 +87,7 @@
 
 ##    Note: This variable only applies if you let Terraform create a new VPC. Custom deployment with byo_vpc enabled will ignore this
 
-#vpc_cidr                                   = "10.1.0.0/16"
+vpc_cidr                                   = "172.18.0.0/16"
 
 ##    Subnet space. (Minimum /28 required. Default is null). If you do not specify subnets, they will automatically be assigned based on the default cidrsubnet
 ##    creation within the VPC CIDR block. Uncomment and modify if byo_vpc is set to true but byo_subnets is left false meaning you want terraform to create 
@@ -102,16 +107,16 @@
 ## 11. Number of Workload VMs to be provisioned in the workload subnet. Only limitation is available IP space
 ##    in subnet configuration. Only applicable for "base" deployment types. Default workload subnet is /24 so 250 max
 
-#workload_count                             = 2
+workload_count                             = 2
 
 ## 12. Tag attribute "Owner" assigned to all resoure creation. (Default: "zscc-admin")
 
-#owner_tag                                  = "username@company.com"
+owner_tag                                  = "jgreensmith@zscaler.com"
 
 ## 13. By default, GWLB deployments are configured as zonal. Uncomment if you want to enable cross-zone load balancing
 ##     functionality. Only applicable for gwlb deployment types. (Default: false)
 
-#cross_zone_lb_enabled                      = true
+cross_zone_lb_enabled                      = true
 
 ## 14. Gateway loadbalancing hashing algorithm. Default is 5-tuple (None).
 ##     Additional options include: 2-tuple (source_ip_dest_ip) and 3-tuple (source_ip_dest_ip_proto)
@@ -119,7 +124,7 @@
 
 #flow_stickiness                            = "2-tuple"
 #flow_stickiness                            = "3-tuple"
-#flow_stickiness                            = "5-tuple"
+flow_stickiness                            = "5-tuple"
 
 ## 15. Indicates how the GWLB handles existing flows when a target is deregistered or marked unhealthy. 
 ##     true means rebalance after deregistration. false means no_rebalance. (Default: true)
@@ -143,12 +148,12 @@
 ## 18. By default, this script will apply 1 Security Group per Cloud Connector instance. 
 ##     Uncomment if you want to use the same Security Group for ALL Cloud Connectors (true or false. Default: false)
 
-#reuse_security_group                       = true
+reuse_security_group                       = true
 
 ## 19. By default, this script will apply 1 IAM Role/Instance Profile per Cloud Connector instance. 
 ##     Uncomment if you want to use the same IAM Role/Instance Profile for ALL Cloud Connectors (true or false. Default: false)
 
-#reuse_iam                                  = true
+reuse_iam                                  = true
 
 ## 20. By default, the VPC Endpoint Service created will auto accept any VPC Endpoint registration attempts.
 ##     Uncomment if you want to require manual acceptance. (true or false. Default: false)
@@ -212,7 +217,7 @@
 ##     mapping structure and syntax. ZPA Module will read through each to create a resolver rule per domain_name entry. Ucomment domain_names variable and
 ##     add any additional appsegXX mappings as needed.
 
-#domain_names = {
-#  appseg1 = "app1.com"
-#  appseg2 = "app2.com"
-#}
+domain_names = {
+  appseg1 = "nix.zphyrs.com"
+  appseg2 = "zphyrs.com"
+}

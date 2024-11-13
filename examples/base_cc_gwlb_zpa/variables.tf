@@ -1,3 +1,9 @@
+variable "ssh_key_pair" {
+  type        = string
+  description = "SSH key to use for login to VMs"
+  default     = "cc-kp"
+}
+
 variable "aws_region" {
   type        = string
   description = "The AWS region."
